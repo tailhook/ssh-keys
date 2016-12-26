@@ -27,20 +27,27 @@ pub fn parse_public_key(line: &str) -> Result<PublicKey, Error> {
     let kind = iter.next().ok_or(Error::InvalidFormat)?;
     let data = iter.next().ok_or(Error::InvalidFormat)?;
     let buf = base64::decode(data).map_err(|_| Error::InvalidFormat)?;
+
+    let mut cur = Cursor::new(&buf);
+    let int_kind = cur.read_string()?;
+    if int_kind != int_kind {
+        return Err(Error::InvalidFormat);
+    }
+
     match kind {
         "ssh-rsa" => {
-            let mut cur = Cursor::new(&buf);
-            let kind = cur.read_string()?;
-            if kind != "ssh-rsa" {
-                return Err(Error::InvalidFormat);
-            }
             let e = cur.read_bytes()?;
             let n = cur.read_bytes()?;
             Ok(PublicKey::Rsa { exponent: e.to_vec(), modulus: n.to_vec() })
         }
         "ssh-ed25519" => {
-            println!("Data {:?}", buf);
-            unimplemented!();
+            let key = cur.read_bytes()?;
+            if key.len() != 32 {
+                return Err(Error::InvalidFormat);
+            }
+            let mut array_key = [0u8; 32];
+            array_key.copy_from_slice(key);
+            Ok(PublicKey::Ed25519(array_key))
         }
         _ => Err(Error::UnsupportedType(kind.to_string()))
     }

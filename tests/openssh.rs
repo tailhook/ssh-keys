@@ -108,3 +108,14 @@ fn test_pub_rsa4096() {
             129, 146, 24, 190, 140, 237, 217, 144, 229, 98, 53],
     });
 }
+
+#[test]
+fn test_pub_ed25519() {
+    let key = ssh_keys::openssh::parse_public_key(
+            &read_file("test-keys/ed25519.pub")
+        ).unwrap();
+    assert_eq!(key, PublicKey::Ed25519(
+        [182, 135, 254, 94, 168, 107, 218, 136, 69, 10, 76, 17, 52, 204, 42,
+        119, 218, 188, 182, 42, 243, 239, 135, 37, 87, 29, 93, 143, 143, 19,
+        101, 42]));
+}
