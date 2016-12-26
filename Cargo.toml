@@ -1,0 +1,12 @@
+[package]
+name = "ssh-keys"
+description = """
+    Parser of ssh public and private keys
+"""
+license = "MIT/Apache-2.0"
+readme = "README.rst"
+keywords = ["ssh", "keys", "parser"]
+homepage = "http://github.com/tailhook/ssh-keys"
+documentation = "http://docs.rs/ssh-keys"
+version = "0.1.0"
+authors = ["paul@colomiets.name"]
