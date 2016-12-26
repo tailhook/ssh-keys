@@ -10,3 +10,8 @@ homepage = "http://github.com/tailhook/ssh-keys"
 documentation = "http://docs.rs/ssh-keys"
 version = "0.1.0"
 authors = ["paul@colomiets.name"]
+
+[dependencies]
+quick-error = "1.1.0"
+base64 = "0.2.1"
+byteorder = "0.5.3"
