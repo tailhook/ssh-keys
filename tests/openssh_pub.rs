@@ -15,7 +15,7 @@ fn read_file<T: AsRef<Path>>(path: T) -> String {
 }
 
 #[test]
-fn test_pub_rsa1024() {
+fn rsa1024() {
     let key = ssh_keys::openssh::parse_public_key(
             &read_file("test-keys/rsa1024.pub")
         ).unwrap();
@@ -35,7 +35,7 @@ fn test_pub_rsa1024() {
 }
 
 #[test]
-fn test_pub_rsa2048() {
+fn rsa2048() {
     let key = ssh_keys::openssh::parse_public_key(
             &read_file("test-keys/rsa2048.pub")
         ).unwrap();
@@ -64,7 +64,7 @@ fn test_pub_rsa2048() {
 }
 
 #[test]
-fn test_pub_rsa4096() {
+fn rsa4096() {
     let key = ssh_keys::openssh::parse_public_key(
             &read_file("test-keys/rsa4096.pub")
         ).unwrap();
@@ -110,7 +110,7 @@ fn test_pub_rsa4096() {
 }
 
 #[test]
-fn test_pub_ed25519() {
+fn ed25519() {
     let key = ssh_keys::openssh::parse_public_key(
             &read_file("test-keys/ed25519.pub")
         ).unwrap();

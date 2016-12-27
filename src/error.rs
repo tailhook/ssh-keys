@@ -11,6 +11,10 @@ quick_error! {
             description("unsupported key type")
             display("unsupported key type {:?}", typ)
         }
+        /// Private key was encrypted (and now password supplied)
+        Encrypted {
+            description("key was encrypted")
+        }
         #[doc(hidden)]
         __Nonexhaustive
     }

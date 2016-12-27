@@ -1,4 +1,4 @@
-use {PublicKey};
+use {PublicKey, PrivateKey};
 
 
 // We have to implement his manually because Clone doesnt work for [u8; 64]
@@ -31,3 +31,27 @@ impl PartialEq for PublicKey {
 }
 
 impl Eq for PublicKey { }
+
+
+// We have to implement his manually because Clone doesnt work for [u8; 64]
+impl Clone for PrivateKey {
+    fn clone(&self) -> PrivateKey {
+        use PrivateKey::*;
+        match *self {
+            Ed25519(data) => Ed25519(data),
+        }
+    }
+}
+
+// We have to implement his manually because PartialEq doesnt work for [u8; 64]
+impl PartialEq for PrivateKey {
+    fn eq(&self, other: &PrivateKey) -> bool {
+        use PrivateKey::*;
+        match (self, other) {
+            (&Ed25519(ref d1), &Ed25519(ref d2)) => &d1[..] == &d2[..],
+        }
+
+    }
+}
+
+impl Eq for PrivateKey { }
