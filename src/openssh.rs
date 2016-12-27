@@ -20,6 +20,11 @@ struct Cursor<'a> {
     offset: usize,
 }
 
+struct Asn1<'a> {
+    data: &'a [u8],
+    offset: usize,
+}
+
 
 /// Parse a single SSH public key in openssh format
 pub fn parse_public_key(line: &str) -> Result<PublicKey, Error> {
@@ -54,21 +59,42 @@ pub fn parse_public_key(line: &str) -> Result<PublicKey, Error> {
 }
 
 /// Parse a SSH privte key in openssh format
+///
+/// Note new format of SSH key can potentially contain more than one key
 pub fn parse_private_key(data: &str) -> Result<Vec<PrivateKey>, Error> {
     if data.starts_with("-----BEGIN RSA PRIVATE KEY-----") {
-        let start = match (data.find("\n\n"), data.find("\r\n\r\n")) {
+        let end = data.find("-----END RSA PRIVATE KEY-----")
+            .ok_or(Error::InvalidFormat)?;
+        let start = match (data[..end].find("\n\n"),
+                           data[..end].find("\r\n\r\n"))
+        {
             (Some(x), Some(y)) if x < y => x,
             (Some(_), Some(y)) => y,
             (Some(x), None) => x,
             (None, Some(y)) => y,
-            (None, None) => return Err(Error::InvalidFormat),
+            (None, None) => "-----BEGIN RSA PRIVATE KEY-----".len(),
         };
-        let end = data.find("-----END RSA PRIVATE KEY-----")
-            .ok_or(Error::InvalidFormat)?;
-        let data = base64::decode_ws(&data[start..end])
+        let data = base64::decode_ws(data[start..end].trim())
             .map_err(|_| Error::InvalidFormat)?;
-        println!("DATA {:?}", data);
-        unimplemented!();
+        let mut cur = Asn1::new(&data);
+        let mut items = cur.sequence()?;
+        let ver = items.read_short_int()?;
+        if ver != 0 {
+            return Err(Error::UnsupportedType(format!("version {}", ver)));
+        }
+        let n = items.read_big_int()?;
+        let e = items.read_big_int()?;
+        let d = items.read_big_int()?;
+        let p = items.read_big_int()?;
+        let q = items.read_big_int()?;
+        let _x = items.read_big_int()?;
+        let _y = items.read_big_int()?;
+        let iqmp = items.read_big_int()?;
+        return Ok(vec![PrivateKey::Rsa {
+            n: n.to_vec(), e: e.to_vec(), d: d.to_vec(),
+            iqmp: iqmp.to_vec(),
+            p: p.to_vec(), q: q.to_vec(),
+        }]);
     } else if data.starts_with("-----BEGIN OPENSSH PRIVATE KEY-----") {
         let start = "-----BEGIN OPENSSH PRIVATE KEY-----".len();
         let end = data.find("-----END OPENSSH PRIVATE KEY-----")
@@ -171,3 +197,77 @@ impl<'a> Cursor<'a> {
     }
 }
 
+
+/// A limited ASN1 (DER) parser suitable to decode RSA key
+impl<'a> Asn1<'a>  {
+    pub fn new(data: &[u8]) -> Asn1 {
+        Asn1 {
+            data: data,
+            offset: 0,
+        }
+    }
+    fn read_len(&mut self) -> Result<usize, Error> {
+        if self.offset >= self.data.len() {
+            return Err(Error::InvalidFormat);
+        }
+        let lbyte = self.data[self.offset];
+        self.offset += 1;
+        if lbyte == 128 || lbyte == 255 {
+            return Err(Error::InvalidFormat);
+        }
+        if lbyte & 128 == 0 {
+            return Ok(lbyte as usize);
+        }
+        let nbytes = (lbyte & 127) as usize;
+        if self.data.len() < self.offset + nbytes {
+            return Err(Error::InvalidFormat);
+        }
+        let mut result: usize = 0;
+        for i in 0..nbytes {
+            result = result.checked_mul(256).ok_or(Error::InvalidFormat)?
+                     + self.data[self.offset+i] as usize;
+        }
+        self.offset += nbytes;
+        return Ok(result);
+    }
+    pub fn sequence(&mut self) -> Result<Asn1<'a>, Error> {
+        if self.offset >= self.data.len() {
+            return Err(Error::InvalidFormat);
+        }
+        let byte = self.data[self.offset];
+        // Universal, construct, sequence
+        if byte != (0 << 6) | (1 << 5) | 16 {
+            return Err(Error::InvalidFormat);
+        }
+        self.offset += 1;
+        let bytes = self.read_len()?;
+        let res = Asn1::new(&self.data[self.offset..self.offset+bytes]);
+        self.offset += bytes;
+        return Ok(res);
+    }
+    pub fn read_big_int(&mut self) -> Result<&'a [u8], Error> {
+        if self.offset >= self.data.len() {
+            return Err(Error::InvalidFormat);
+        }
+        let byte = self.data[self.offset];
+        // Universal, primitive, integer
+        if byte != (0 << 6) | (0 << 5) | 2 {
+            return Err(Error::InvalidFormat);
+        }
+        self.offset += 1;
+        let len = self.read_len()?;
+        if self.data.len() < self.offset + len {
+            return Err(Error::InvalidFormat);
+        }
+        let result = &self.data[self.offset..self.offset + len];
+        self.offset += len;
+        return Ok(result);
+    }
+    pub fn read_short_int(&mut self) -> Result<u8, Error> {
+        let data = self.read_big_int()?;
+        if data.len() != 1 {
+            return Err(Error::InvalidFormat);
+        }
+        return Ok(data[0]);
+    }
+}
