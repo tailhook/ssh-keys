@@ -39,6 +39,9 @@ impl Clone for PrivateKey {
         use PrivateKey::*;
         match *self {
             Ed25519(data) => Ed25519(data),
+            Rsa { ref n, ref e, ref d, ref iqmp, ref p, ref q }
+            => Rsa { n: n.clone(), e: e.clone(), d: d.clone(),
+                     iqmp: iqmp.clone(), p: p.clone(), q: q.clone() },
         }
     }
 }
@@ -48,7 +51,17 @@ impl PartialEq for PrivateKey {
     fn eq(&self, other: &PrivateKey) -> bool {
         use PrivateKey::*;
         match (self, other) {
+            (&Rsa { n: ref n1, e: ref e1, d: ref d1, iqmp: ref iqmp1,
+                    p: ref p1, q: ref q1 },
+             &Rsa { n: ref n2, e: ref e2, d: ref d2, iqmp: ref iqmp2,
+                    p: ref p2, q: ref q2 }
+            ) => {
+                n1 == n2 && e1 == e2 && d1 == d2 && iqmp1 == iqmp2 &&
+                p1 == p2 && q1 == q2
+            }
+            (&Rsa {..}, _) => false,
             (&Ed25519(ref d1), &Ed25519(ref d2)) => &d1[..] == &d2[..],
+            (&Ed25519(..), _) => false,
         }
 
     }

@@ -109,6 +109,20 @@ pub fn parse_private_key(data: &str) -> Result<Vec<PrivateKey>, Error> {
                             array_key.copy_from_slice(priv_key);
                             result.push(PrivateKey::Ed25519(array_key));
                         }
+                        "ssh-rsa" => {
+                            let n = pcur.read_bytes()?;
+                            let e = pcur.read_bytes()?;
+                            let d = pcur.read_bytes()?;
+                            let iqmp = pcur.read_bytes()?;
+                            let p = pcur.read_bytes()?;
+                            let q = pcur.read_bytes()?;
+                            let _comment = pcur.read_string()?;
+                            result.push(PrivateKey::Rsa {
+                                n: n.to_vec(), e: e.to_vec(), d: d.to_vec(),
+                                iqmp: iqmp.to_vec(),
+                                p: p.to_vec(), q: q.to_vec(),
+                            })
+                        }
                         _ => {
                             return Err(Error::UnsupportedType(
                                 key_type.to_string()));

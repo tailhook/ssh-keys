@@ -21,6 +21,10 @@ impl fmt::Debug for PrivateKey {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         use PrivateKey::*;
         match *self {
+            Rsa { .. } => {
+                // TODO(tailhook) show length
+                write!(f, "PrivateKey::Rsa")
+            }
             Ed25519(..) => {
                 write!(f, "PrivateKey::Ed25519")
             }

@@ -21,13 +21,15 @@ pub enum PublicKey {
     #[allow(missing_docs)]
     Rsa { exponent: Vec<u8>, modulus: Vec<u8> },
     /// Ed25519 (eliptic curves) key
-    Ed25519([u8; 32])
+    Ed25519([u8; 32]),
 }
 
 /// Secret key enum
 pub enum PrivateKey {
     /// RSA key
-    //Rsa { exponent: , modulus }
+    #[allow(missing_docs)]
+    Rsa { n: Vec<u8>, e: Vec<u8>, d: Vec<u8>, iqmp: Vec<u8>,
+          p: Vec<u8>, q: Vec<u8> },
     /// Ed25519 (eliptic curves) key
-    Ed25519([u8; 64])
+    Ed25519([u8; 64]),
 }
