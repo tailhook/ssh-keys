@@ -11,7 +11,7 @@ quick_error! {
             description("unsupported key type")
             display("unsupported key type {:?}", typ)
         }
-        /// Private key was encrypted (and now password supplied)
+        /// Private key was encrypted (we don't support encrypted keys yet)
         Encrypted {
             description("key was encrypted")
         }

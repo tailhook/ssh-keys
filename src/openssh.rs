@@ -5,6 +5,8 @@
 //! * `ssh-rsa`
 //! * `ssh-ed25519`
 //!
+//! Both ASN1 and openssh-key-v1 format supported.
+//!
 //! Password-protected private keys are not supported yet
 
 use std::str::from_utf8;
@@ -58,7 +60,7 @@ pub fn parse_public_key(line: &str) -> Result<PublicKey, Error> {
     }
 }
 
-/// Parse a SSH privte key in openssh format
+/// Parse a SSH private key in openssh format
 ///
 /// Note new format of SSH key can potentially contain more than one key
 pub fn parse_private_key(data: &str) -> Result<Vec<PrivateKey>, Error> {
