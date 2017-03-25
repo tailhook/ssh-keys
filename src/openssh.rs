@@ -101,6 +101,9 @@ pub fn parse_private_key(data: &str) -> Result<Vec<PrivateKey>, Error> {
         let start = "-----BEGIN OPENSSH PRIVATE KEY-----".len();
         let end = data.find("-----END OPENSSH PRIVATE KEY-----")
             .ok_or(Error::InvalidFormat)?;
+        if start >= end {
+            return Err(Error::InvalidFormat);
+        }
         let data = base64::decode_ws(&data[start..end].trim())
             .map_err(|_| Error::InvalidFormat)?;
         let end = data.iter().position(|&x| x == 0)

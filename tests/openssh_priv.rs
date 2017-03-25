@@ -15,6 +15,13 @@ fn read_file<T: AsRef<Path>>(path: T) -> String {
 }
 
 #[test]
+fn invalid_key() {
+    assert!(ssh_keys::openssh::parse_private_key(
+            "-----BEGIN OPENSSH PRIVATE KEY------END OPENSSH PRIVATE KEY-----"
+        ).is_err());
+}
+
+#[test]
 fn ed25519() {
     let key = ssh_keys::openssh::parse_private_key(
             &read_file("test-keys/ed25519")
