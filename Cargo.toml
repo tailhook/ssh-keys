@@ -13,5 +13,5 @@ authors = ["paul@colomiets.name"]
 
 [dependencies]
 quick-error = "1.1.0"
-base64 = "0.2.1"
-byteorder = "0.5.3"
+base64 = "0.9.0"
+byteorder = "1.2.2"

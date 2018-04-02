@@ -33,7 +33,7 @@ pub fn parse_public_key(line: &str) -> Result<PublicKey, Error> {
     let mut iter = line.split_whitespace();
     let kind = iter.next().ok_or(Error::InvalidFormat)?;
     let data = iter.next().ok_or(Error::InvalidFormat)?;
-    let buf = base64::decode(data).map_err(|_| Error::InvalidFormat)?;
+    let buf = b64decode(data.as_bytes())?;
 
     let mut cur = Cursor::new(&buf);
     let int_kind = cur.read_string()?;
@@ -60,6 +60,16 @@ pub fn parse_public_key(line: &str) -> Result<PublicKey, Error> {
     }
 }
 
+fn b64decode(data: &[u8]) -> Result<Vec<u8>, Error> {
+    base64::decode_config(data, base64::Config::new(
+        base64::CharacterSet::Standard,
+        /*pad*/ true,
+        /*strip_whitepace*/ true,
+        base64::LineWrap::NoWrap, // irrelevant
+    ))
+    .map_err(|_| Error::InvalidFormat)
+}
+
 /// Parse a SSH private key in openssh format
 ///
 /// Note new format of SSH key can potentially contain more than one key
@@ -76,8 +86,7 @@ pub fn parse_private_key(data: &str) -> Result<Vec<PrivateKey>, Error> {
             (None, Some(y)) => y,
             (None, None) => "-----BEGIN RSA PRIVATE KEY-----".len(),
         };
-        let data = base64::decode_ws(data[start..end].trim())
-            .map_err(|_| Error::InvalidFormat)?;
+        let data = b64decode(data[start..end].trim().as_bytes())?;
         let mut cur = Asn1::new(&data);
         let mut items = cur.sequence()?;
         let ver = items.read_short_int()?;
@@ -104,8 +113,7 @@ pub fn parse_private_key(data: &str) -> Result<Vec<PrivateKey>, Error> {
         if start >= end {
             return Err(Error::InvalidFormat);
         }
-        let data = base64::decode_ws(&data[start..end].trim())
-            .map_err(|_| Error::InvalidFormat)?;
+        let data = b64decode(data[start..end].trim().as_bytes())?;
         let end = data.iter().position(|&x| x == 0)
             .ok_or(Error::InvalidFormat)?;
         let kind = from_utf8(&data[..end]).map_err(|_| Error::InvalidFormat)?;
