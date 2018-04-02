@@ -1,9 +1,9 @@
-==============
 SSH Keys Crate
 ==============
 
-:Status: Beta
-:Documentation: http://docs.rs/ssh-keys/
+[Docs](https://docs.rs/ssh-keys/) |
+[Github](https://github.com/tailhook/ssh-keys/) |
+[Crate](https://crates.io/crates/ssh-keys)
 
 
 Pure SSH implementation of the parser of the SSH keys, both public and private.

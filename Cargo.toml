@@ -4,8 +4,9 @@ description = """
     Parser of ssh public and private keys
 """
 license = "MIT/Apache-2.0"
-readme = "README.rst"
+readme = "README.md"
 keywords = ["ssh", "keys", "parser"]
+categories = ["parser-implementations"]
 homepage = "http://github.com/tailhook/ssh-keys"
 documentation = "http://docs.rs/ssh-keys"
 version = "0.1.0"

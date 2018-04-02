@@ -2,7 +2,12 @@
 //!
 //! The only key format supported so far is ``openssh``.
 //!
+//! [Docs](https://docs.rs/ssh-keys/) |
+//! [Github](https://github.com/tailhook/ssh-keys/) |
+//! [Crate](https://crates.io/crates/ssh-keys)
+//!
 #![warn(missing_docs)]
+#![warn(missing_debug_implementations)]
 
 extern crate base64;
 extern crate byteorder;
