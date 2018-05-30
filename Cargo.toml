@@ -9,7 +9,7 @@ keywords = ["ssh", "keys", "parser"]
 categories = ["parser-implementations"]
 homepage = "http://github.com/tailhook/ssh-keys"
 documentation = "http://docs.rs/ssh-keys"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["paul@colomiets.name"]
 
 [dependencies]
