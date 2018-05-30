@@ -16,6 +16,7 @@ extern crate byteorder;
 mod error;
 mod debug;
 mod stdimpls;
+mod conversion;
 pub mod openssh;
 
 pub use error::Error;
