@@ -1,3 +1,8 @@
+use std::fmt;
+
+use base64;
+use byteorder::{BigEndian, WriteBytesExt};
+
 use {PublicKey, PrivateKey};
 
 
@@ -32,6 +37,33 @@ impl PartialEq for PublicKey {
 
 impl Eq for PublicKey { }
 
+impl fmt::Display for PublicKey {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use PublicKey::*;
+        match *self {
+            Rsa { ref exponent, ref modulus } => {
+                let mut buf = Vec::with_capacity(512);
+                buf.write_u32::<BigEndian>("ssh-rsa".len() as u32).unwrap();
+                buf.extend(b"ssh-rsa");
+                buf.write_u32::<BigEndian>(exponent.len() as u32).unwrap();
+                buf.extend(exponent);
+                buf.write_u32::<BigEndian>(modulus.len() as u32).unwrap();
+                buf.extend(modulus);
+                write!(f, "ssh-rsa {}",
+                    base64::display::Base64Display::standard(&buf))
+            }
+            Ed25519(data) => {
+                let mut buf = Vec::with_capacity(512);
+                buf.write_u32::<BigEndian>("ssh-ed25519".len() as u32).unwrap();
+                buf.extend(b"ssh-ed25519");
+                buf.write_u32::<BigEndian>(data.len() as u32).unwrap();
+                buf.extend(&data);
+                write!(f, "ssh-ed25519 {}",
+                    base64::display::Base64Display::standard(&buf))
+            }
+        }
+    }
+}
 
 // We have to implement his manually because Clone doesnt work for [u8; 64]
 impl Clone for PrivateKey {

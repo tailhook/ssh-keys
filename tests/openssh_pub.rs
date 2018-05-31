@@ -34,6 +34,14 @@ fn rsa1024() {
     });
 }
 
+#[test]
+fn rsa1024_display() {
+    let data = read_file("test-keys/rsa1024.pub");
+    let key = ssh_keys::openssh::parse_public_key(&data).unwrap();
+    let value = key.to_string() + " ";
+    assert!(data.starts_with(&value));
+}
+
 
 #[test]
 fn rsa2048() {
@@ -119,4 +127,15 @@ fn ed25519() {
         [182, 135, 254, 94, 168, 107, 218, 136, 69, 10, 76, 17, 52, 204, 42,
         119, 218, 188, 182, 42, 243, 239, 135, 37, 87, 29, 93, 143, 143, 19,
         101, 42]));
+}
+
+#[test]
+fn ed25519_display() {
+    let key = ssh_keys::openssh::parse_public_key(
+            &read_file("test-keys/ed25519.pub")
+        ).unwrap();
+    assert_eq!(key.to_string(),
+        "ssh-ed25519 \
+         AAAAC3NzaC1lZDI1NTE5AAAAILaH/l6oa9qIRQp\
+         METTMKnfavLYq8++HJVcdXY+PE2Uq");
 }
