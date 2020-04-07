@@ -254,6 +254,9 @@ impl<'a> Asn1<'a>  {
         }
         self.offset += 1;
         let bytes = self.read_len()?;
+        if self.offset+bytes > self.data.len() {
+            return Err(Error::InvalidFormat);
+        }
         let res = Asn1::new(&self.data[self.offset..self.offset+bytes]);
         self.offset += bytes;
         return Ok(res);

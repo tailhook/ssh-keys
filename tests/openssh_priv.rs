@@ -153,3 +153,10 @@ fn rsa1024_pub() {
             51],
     });
 }
+
+#[test]
+fn bounds_check() {
+    ssh_keys::openssh::parse_private_key(
+        &read_file("test-keys/buggy_key")
+    ).unwrap_err();
+}
